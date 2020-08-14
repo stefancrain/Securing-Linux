@@ -1,0 +1,9 @@
+*.vdi
+*.log
+.vagrant
+.DS_Store
+
+isos
+
+inventory/group_vars/vault.yml
+.vault.pass
