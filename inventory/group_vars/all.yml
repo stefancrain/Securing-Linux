@@ -1,0 +1,13 @@
+---
+ansible_connection: ssh
+ansible_port: 22
+
+ansible_user: placeholder_overriden_in_vault.yml
+ansible_ssh_pass: placeholder_overriden_in_vault.yml
+ansible_ssh_common_args: placeholder_overriden_in_vault.yml
+ansible_become_pass: placeholder_overriden_in_vault.yml
+ansible_python_interpreter: placeholder_overriden_in_vault.yml
+
+created_user_name: placeholder_overriden_in_vault.yml
+created_user_password: placeholder_overriden_in_vault.yml
+created_user_ssh_pubkey: placeholder_overriden_in_vault.yml

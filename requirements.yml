@@ -1,0 +1,6 @@
+---
+- src: dev-sec.os-hardening
+- src: dev-sec.ssh-hardening
+- src: ericsysmin.chrony
+- src: geerlingguy.docker
+- src: geerlingguy.clamav
