@@ -1,0 +1,19 @@
+---
+# role: {{ role_name }}
+# file: tasks/tasks.yml
+
+{% raw %}
+- name: "package : ensure that repositories are up to date"
+  apt:
+    update_cache: true
+    cache_valid_time: "{{ {% endraw %}{{ role_name | replace('ansible_role_', '') }}{% raw %}_cache_seconds }}"
+
+- name: "package : Install packages for {% endraw %}{{ role_name }}{% raw %}"
+  package:
+    name: "{{ {% endraw %}{{ role_name | replace('ansible_role_', '') }}{% raw %}_packages }}"
+    state: present
+  register: {% endraw %}{{ role_name | replace('ansible_role_', '') }}{% raw %}_package_res
+  retries: 5
+  until: {% endraw %}{{ role_name | replace('ansible_role_', '') }}{% raw %}_package_res is success
+
+{% endraw %}

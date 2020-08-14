@@ -1,0 +1,8 @@
+#!/bin/bash
+
+# --cronjob suppresses colored output and interactive key presses
+# --update keeps definitions up to date
+# --quiet suppresses all output
+
+/usr/bin/rkhunter --cronjob --update --quiet
+/usr/bin/debsums --all --silent --changed --ignore-obsolete

@@ -1,0 +1,94 @@
+---
+- name: Secure linux environment
+  hosts: all
+  become: true
+  vars_files:
+    - "../inventory/group_vars/vault.yml"
+  vars:
+    base_timezone: America/New_York
+    docker_users:
+      - vagrant
+    # docker_edition: "ce"
+    # docker_version: "5:19.03.6~3-0~ubuntu-bionic"
+    # docker_package: "docker-{{ docker_edition }}={{ docker_version }}"
+    docker_service_state: started
+    docker_service_enabled: true
+    docker_restart_handler_state: restarted
+    docker_data_root: /docker
+
+    os_auth_pw_max_age: 365
+    ssh_print_motd: true
+    ssh_banner: true
+    ssh_print_debian_banner: true
+    ssh_max_auth_retries: 1
+    ssh_server_ports: ["4312"]
+    ssh_client_alive_interval: 300
+    ssh_client_alive_count: 2
+    ssh_print_last_log: true
+    ssh_client_password_login: true
+    ssh_macs:
+      - hmac-sha2-512-etm@openssh.com
+      - hmac-sha2-256-etm@openssh.com
+      - umac-128-etm@openssh.com
+    ssh_ciphers:
+      - chacha20-poly1305@openssh.com
+      - aes256-gcm@openssh.com
+      - aes128-gcm@openssh.com
+      - aes256-ctr
+      - aes192-ctr
+      - aes128-ctr
+    ssh_kex:
+      - curve25519-sha256@libssh.org
+      - diffie-hellman-group-exchange-sha256
+      - diffie-hellman-group14-sha256
+      - diffie-hellman-group16-sha512
+      - diffie-hellman-group18-sha512
+      - curve25519-sha256
+
+  roles:
+    # - { role: ../roles/base }
+    # - { role: ../roles/physical_access }
+    # - { role: ../roles/network_access }
+    # - { role: ../roles/audit_tools }
+    # - { role: ../roles/rbac }
+    # - { role: ../roles/data }
+    # # - { role: ../roles/disks }
+    # # - { role: ../roles/grub }
+    # - ericsysmin.chrony
+    # - dev-sec.os-hardening
+    # - dev-sec.ssh-hardening
+    # - geerlingguy.clamav
+    - geerlingguy.docker
+    - { role: ../roles/docker }
+  tasks:
+    - name: Remove a login user
+      user:
+        name: "{{ created_user_name }}"
+        remove: true
+        state: absent
+
+    - name: Ensure groups exists
+      group:
+        name: "{{ item }}"
+        state: present
+      with_items:
+        - docker
+
+    - name: Create a login user
+      user:
+        name: "{{ created_user_name }}"
+        password: "{{ created_user_password| password_hash('sha512', created_user_password_salt)  }} "
+        groups:
+          - sudo
+          - adm
+          - docker
+          - staff
+        state: present
+        skeleton: /etc/skel
+        shell: /bin/bash
+        createhome: true
+
+    - name: "Add authorized keys"
+      authorized_key:
+        user: "{{ created_user_name }}"
+        key: "{{ created_user_ssh_pubkey }}"

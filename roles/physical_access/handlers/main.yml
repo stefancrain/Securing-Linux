@@ -1,0 +1,14 @@
+---
+# role: physical_access
+# file: handlers/main.yml
+
+- name: update grub
+  command: /usr/sbin/update-grub
+
+- name: grub-v2-update-config
+  command: "{{ grub_password_mkconfig }} -o {{ grub_boot_path }}/grub.cfg"
+# - name: enable and restart service
+#   service:
+#     name:
+#     state: restarted
+#     enabled: true

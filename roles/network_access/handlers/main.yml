@@ -1,0 +1,22 @@
+---
+# role: network_access
+# file: handlers/main.yml
+
+# - name: restart network
+#   service:
+#     name: network
+#     state: restarted
+
+- name: restart ssh
+  service:
+    name: ssh
+    state: restarted
+
+- name: restart fail2ban
+  service:
+    name: fail2ban
+    state: restarted
+
+- name: reload ufw
+  ufw:
+    state: reloaded

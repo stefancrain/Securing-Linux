@@ -1,0 +1,30 @@
+---
+- name: Check if cgroup memory and swapaccount in kernel
+  shell: grep GRUB_CMDLINE_LINUX /etc/default/grub | grep -c "cgroup_enable=memory swapaccount=1"
+  register: default_cgroup_status
+  ignore_errors: true
+
+- name: Check if cgroup memory and swapaccount in kernel
+  shell: grep GRUB_CMDLINE_LINUX /etc/default/grub.d/50-cloudimg-settings.cfg | grep -c "cgroup_enable=memory swapaccount=1"
+  register: cloudimg_cgroup_status
+  ignore_errors: true
+
+- name: Enable cgroup memory and swapaccount
+  lineinfile:
+    dest: "/etc/default/grub"
+    regexp: 'GRUB_CMDLINE_LINUX="(.*)"'
+    line: 'GRUB_CMDLINE_LINUX="\1 cgroup_enable=memory swapaccount=1"'
+    backrefs: true
+  when: default_cgroup_status.stdout == "0"
+  notify:
+    - update grub
+
+- name: Enable cgroup memory and swapaccount
+  lineinfile:
+    dest: "/etc/default/grub.d/50-cloudimg-settings.cfg"
+    regexp: 'GRUB_CMDLINE_LINUX="(.*)"'
+    line: 'GRUB_CMDLINE_LINUX="\1 cgroup_enable=memory swapaccount=1"'
+    backrefs: true
+  when: cloudimg_cgroup_status.stdout == "0"
+  notify:
+    - update grub

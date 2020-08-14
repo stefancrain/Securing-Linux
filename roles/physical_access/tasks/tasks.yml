@@ -1,0 +1,66 @@
+---
+# role: physical_access
+# file: tasks/tasks.yml
+
+- name: "package : ensure that repositories are up to date"
+  apt:
+    update_cache: true
+    cache_valid_time: "{{ physical_access_cache_seconds }}"
+
+# https://www.systutorials.com/docs/linux/man/5-usbguard-rules.conf/
+# https://gist.github.com/luckylittle/890071cc01aa4187397bdb957c0bc76e
+
+- name: "package : install packages for physical_access"
+  package:
+    name: "{{ physical_access_packages }}"
+    state: present
+  register: physical_access_package_res
+  retries: 5
+  until: physical_access_package_res is success
+
+- name: "usbguard : update /etc/usbguard/rules.conf"
+  template:
+    src: usbguard-rules.conf.j2
+    dest: /etc/usbguard/rules.conf
+    mode: 0600
+    owner: root
+    group: root
+# - name: "grub : add superuser"
+#   lineinfile:
+#     dest: "{{ grub_password_file }}"
+#     regexp: "^set superusers: "
+#     state: present
+#     insertafter: EOF
+#     line: 'set superusers: "{{ grub_password_v2_admin }}"'
+#   notify:
+#     - grub-v2-update-config
+#   tags:
+#     - grub-password
+
+# - name: "grub : add superuser password"
+#   lineinfile:
+#     dest: "{{ grub_password_file }}"
+#     regexp: "^password_pbkdf2 {{ grub_password_v2_admin }} "
+#     state: present
+#     insertafter: EOF
+#     line: "password_pbkdf2 {{ grub_password_v2_admin }} {{ grub_password_v2_passwd }}"
+#   tags:
+#     - grub-password
+
+# - name: "grub : add --unrestricted"
+#   replace:
+#     dest: "{{ item }}"
+#     regexp: '^CLASS="(((?!--unrestricted).)*)"$'
+#     replace: 'CLASS="\1 --unrestricted"'
+#   with_items: "{{ grub_password_unrestricted_files }}"
+#   when: grub_password_v2_unrestricted|bool
+#   tags:
+#     - grub-password
+# 8BtaozUrfcSlL346zsBiT59Iajct3RQM
+# grub.pbkdf2.sha512.10000.9DD229624B3C291140EE1F070C17EEF0EA72C48B53B294B692C65109CFAEF343D4C269DEF7FE27DBFB16D722A5F3753EB97AA5E52A57EC32CC1AE0FA6737DF56.3532EE49957E916FD18C2A942553A44149E31A2D064C8E4C36D84E68A9E615CA6663532BEA1FFB36970057984313017E27FDF12120CB1A348ECF78FE0F60363C
+
+# set superusers=”name”
+# password_pbkdf2 name grub.pbkdf2.sha512.10000.9DD229624B3C291140EE1F070C17EEF0EA72C48B53B294B692C65109CFAEF343D4C269DEF7FE27DBFB16D722A5F3753EB97AA5E52A57EC32CC1AE0FA6737DF56.3532EE49957E916FD18C2A942553A44149E31A2D064C8E4C36D84E68A9E615CA6663532BEA1FFB36970057984313017E27FDF12120CB1A348ECF78FE0F60363C
+
+# echo -e 'mypass\nmypass' | grub-mkpasswd-pbkdf2 | awk '/grub.pbkdf/{print$NF}'
+

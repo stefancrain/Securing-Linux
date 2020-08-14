@@ -1,0 +1,40 @@
+{{ ansible_managed | comment }}
+
+# https://readfromfile.com/fail2ban-ban-every-root-login-attempt/
+# https://github.com/pentestmonkey/yaptest/blob/master/ssh-usernames.txt
+# https://github.com/danielmiessler/SecLists/blob/master/Usernames/top-usernames-shortlist.txt
+
+
+[INCLUDES]
+
+# Read common prefixes. If any customizations available -- read them from
+# common.local
+before = common.conf
+
+[DEFAULT]
+
+_daemon = sshd
+
+# optional prefix (logged from several ssh versions) like "error: ", "error: PAM: " or "fatal: "
+__pref = (?:(?:error|fatal): (?:PAM: )?)?
+# optional suffix (logged from several ssh versions) like " [preauth]"
+__suff = (?: \[preauth\])?\s*
+__on_port_opt = (?: port \d+)?(?: on \S+(?: port \d+)?)?
+
+# for all possible (also future) forms of "no matching (cipher|mac|MAC|compression method|key exchange method|host key type) found",
+# see ssherr.c for all possible SSH_ERR_..._ALG_MATCH errors.
+__alg_match = (?:(?:\w+ (?!found\b)){0,2}\w+)
+
+[Definition]
+
+prefregex = ^<F-MLFID>%(__prefix_line)s</F-MLFID>%(__pref)s<F-CONTENT>.+</F-CONTENT>$
+
+failregex = ^[iI](?:llegal|nvalid) user <F-USER>({{ network_access_fail2ban_instant_block | list | join('|') }})</F-USER> from <HOST>%(__on_port_opt)s\s*$
+            ^[aA]uthentication (?:failure|error|failed) for <F-USER>({{ network_access_fail2ban_instant_block | list | join('|') }})</F-USER> from <HOST>( via \S+)?\s*(?: \[preauth\])?\s*$
+            ^Failed publickey for <F-USER>({{ network_access_fail2ban_instant_block | list | join('|') }})</F-USER> from <HOST>
+
+
+ignoreregex =
+maxlines = 1
+journalmatch = _SYSTEMD_UNIT=sshd.service + _COMM=sshd
+

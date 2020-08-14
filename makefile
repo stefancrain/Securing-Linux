@@ -3,14 +3,12 @@
 BOXES = ubuntu/groovy64 \
 				ubuntu/focal64 \
 				ubuntu/bionic64 \
-				debian/buster64 \
-				debian/stretch64
+				debian/buster64
 
 VMS   = groovy \
 				focal \
 				bionic \
-				buster \
-				stretch
+				buster
 
 help: ## show this help.
 	@egrep '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-10s\033[0m %s\n", $$1, $$2}'
@@ -58,7 +56,7 @@ destroy: ## destroy vagrant boxes, clean disks
 
 reset: ## reset vagrant boxes to "first-boot" snapshot
 	for vm in $(VMS); do \
-		vagrant snapshot restore  "$$vm" "first-boot" ; \
+		vagrant snapshot restore "$$vm" "first-boot" ; \
 	done
 
 ############################################################
@@ -78,6 +76,8 @@ pretty: ## correct formatting errors
 
 role: ## create a new role
 	./tools/mkrole.sh
+
+############################################################
 
 audit: ## run playbook to test compliance with audit tools
 	ansible-playbook --vault-password-file=.vault.pass -l TEST playbooks/audit.yml

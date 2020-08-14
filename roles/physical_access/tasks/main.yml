@@ -1,0 +1,7 @@
+---
+# role: physical_access
+# file: tasks/main.yml
+
+- name: Import tasks for role physical_access
+  import_tasks: tasks.yml
+  when: physical_access_enabled | bool

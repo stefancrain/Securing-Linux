@@ -1,0 +1,8 @@
+---
+# role: {{ role_name }}
+# file: tasks/main.yml
+
+- name: Import tasks for role {{ role_name }}
+  import_tasks: tasks.yml
+  when: {{ role_name | replace('ansible_role_', '') }}_enabled | bool
+{{ blank_line }}

@@ -1,0 +1,31 @@
+{{ ansible_managed | comment }}
+
+# Fail2Ban Pushover configuration file
+# Adapted Source: https://gist.github.com/sander1/075736a42db2c66bc6ce0fab159ca683
+
+[Definition]
+
+# Notify on Startup
+actionstart = /usr/bin/curl -s -F "token=<token>" -F "user=<user>" -F "title=[Fail2Ban] <name>" -F "message=Jail <name> has been started successfully." https://api.pushover.net/1/messages
+
+# Notify on Shutdown
+actionstop = /usr/bin/curl -s -F "token=<token>" -F "user=<user>" -F "title=[Fail2Ban] <name>" -F "message=Jail <name> has been stopped." https://api.pushover.net/1/messages
+
+#
+actioncheck =
+
+# Notify on Banned
+actionban = /usr/bin/curl -s -F "token=<token>" -F "user=<user>" -F "title=[Fail2Ban] <name>" -F "message=Banned IP: <ip> Lines containing IP: `grep '<ip>' <logpath>`" https://api.pushover.net/1/messages
+
+# Notify on Unbanned
+actionunban = /usr/bin/curl -s -F "token=<token>" -F "user=<user>" -F "title=[Fail2Ban] <name>" -F "message=Unbanned IP: <ip> Lines containing IP: `grep '<ip>' <logpath>`" https://api.pushover.net/1/messages
+
+[Init]
+
+# Name of the jail in your jail.local file. default = [your-jail-name]
+name = default
+
+# Application token key
+token = YOUR-APPLICATION-TOKEN
+# User API key
+user = YOUR-USER-KEY

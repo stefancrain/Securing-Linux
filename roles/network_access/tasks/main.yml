@@ -1,0 +1,7 @@
+---
+# role: network_access
+# file: tasks/main.yml
+
+- name: Import tasks for role network_access
+  import_tasks: tasks.yml
+  when: network_access_enabled | bool

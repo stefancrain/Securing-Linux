@@ -1,0 +1,144 @@
+---
+# role: network_access
+# file: defaults/main.yml
+
+# The role is disabled by default, so you do not get in trouble.
+# Checked in tasks/main.yml which includes tasks.yml if enabled.
+network_access_enabled: true
+network_access_cache_seconds: 3600
+network_access_packages:
+  ["fail2ban", "sendmail", "ufw", "openssh-client", "openssh-server"]
+
+network_access_ssh_max_sessions: 2
+
+network_access_fail2ban_loglevel: INFO
+network_access_fail2ban_logtarget: /var/log/fail2ban.log
+network_access_fail2ban_socket: /var/run/fail2ban/fail2ban.sock
+
+network_access_fail2ban_ignoreip: 127.0.0.1/8
+network_access_fail2ban_bantime: 600
+network_access_fail2ban_maxretry: 6
+
+network_access_fail2ban_backend: polling
+
+network_access_fail2ban_destemail: root@localhost
+network_access_fail2ban_banaction: iptables-multiport
+network_access_fail2ban_mta: sendmail
+network_access_fail2ban_protocol: tcp
+network_access_fail2ban_chain: INPUT
+
+network_access_fail2ban_action: action_
+
+network_access_fail2ban_services:
+  # SSHD-BASIC will permit any user with an existing account to make a few typos before getting their password right and then move on to my 2FA restrictions and configurations.
+  - name: sshd
+    port: ssh
+    filter: sshd
+    logpath: /var/log/auth.log
+    maxretry: 10
+    # bantime: 600
+    bantime: 60
+
+  # SSHD-AGGRESSIVE will promptly ban the source IP.adx of anyone who tries to login with an account that doesn’t exist on the system –or is one of the configured trigger accounts. (No one shall login remotely as root, oracle, cisco, etc)
+  # - name: sshd-aggressive
+  #   port: ssh
+  #   mode: aggressive
+  #   filter: sshd-aggressive
+  #   logpath: /var/log/auth.log
+  #   maxretry: 0
+  #   bantime: 3888000 # fuck right off for 45 days
+
+  # SSHD-AGGRESSIVE  No one shall login remotely as root, oracle, cisco, etc
+  - name: sshd-user-ban
+    port: ssh
+    filter: sshd-user-ban
+    logpath: /var/log/auth.log
+    maxretry: 1
+    bantime: 60
+    # 1 min
+    findtime: 120
+    # 2 min
+    # bantime: 21600
+    # # 6 hrs
+    # findtime: 3000
+    # # 30 mins
+
+  # - name: traefik-auth
+  #   port: http,https
+  #   filter: traefik-auth
+  #   maxretry: 1
+  #   logpath: /var/log/traefik/access.log
+  # - name: traefik-botsearch
+  #   port: http,https
+  #   filter: traefik-botsearch
+  #   maxretry: 1
+  #   logpath: /var/log/traefik/access.log
+  # - name: traefik-badbots
+  #   port: http,https
+  #   filter: traefik-badbots
+  #   maxretry: 1
+  #   logpath: /var/log/traefik/access.log
+
+network_access_fail2ban_instant_block:
+  - adm
+  - admin
+  - administrator
+  - ansible
+  - apache
+  - at
+  - azureuser
+  - backup
+  - bb
+  - bin
+  - cron
+  - daemon
+  - db2fenc1
+  - db2inst1
+  - Debian-exim
+  - ec2-user
+  - ftp
+  - games
+  - gdm
+  - gnats
+  - guest
+  - halt
+  - info
+  - irc
+  - list
+  - lp
+  - mail
+  - man
+  - mysql
+  - named
+  - news
+  - nobody
+  - ntp
+  - operator
+  - oracle
+  - oracle8
+  - pi
+  - portage
+  - postfix
+  - postgres
+  - postmaster
+  - proxy
+  - public
+  - puppet
+  - root
+  - rpc
+  - rwhod
+  - shutdown
+  - smmsp
+  - smmta
+  - squid
+  - sshd
+  - sync
+  - sys
+  - system
+  - test
+  - toor
+  - user
+  - uucp
+  - websphere
+  - www-data
+  - vagrant

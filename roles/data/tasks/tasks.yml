@@ -1,0 +1,16 @@
+---
+# role: data
+# file: tasks/tasks.yml
+
+- name: "package : ensure that repositories are up to date"
+  apt:
+    update_cache: true
+    cache_valid_time: "{{ data_cache_seconds }}"
+
+- name: "package : install packages for data"
+  package:
+    name: "{{ data_packages }}"
+    state: present
+  register: data_package_res
+  retries: 5
+  until: data_package_res is success

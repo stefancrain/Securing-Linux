@@ -1,0 +1,19 @@
+{{ ansible_managed | comment }}
+
+[traefik-auth]
+enabled = true
+logpath  = %(traefik_access_log)s
+port     = http,https
+
+[traefik-botsearch]
+enabled = true
+logpath = %(traefik_access_log)s
+maxretry = 1
+port     = http,https
+
+[traefik-badbots]
+enabled = true
+filter = apache-badbots
+logpath = %(traefik_access_log)s
+maxretry = 1
+port     = http,https

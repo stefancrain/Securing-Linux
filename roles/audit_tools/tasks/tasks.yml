@@ -1,0 +1,70 @@
+---
+# role: audit_tools
+# file: tasks/tasks.yml
+
+- name: "package : ensure that repositories are up to date"
+  apt:
+    update_cache: true
+    cache_valid_time: "{{ audit_tools_cache_seconds }}"
+
+- name: "package : install packages for audit_tools"
+  package:
+    name: "{{ audit_tools_packages }}"
+    state: present
+  register: audit_tools_package_res
+  retries: 5
+  until: audit_tools_package_res is success
+
+- name: "rkhunter : update /etc/rkhunter.conf"
+  lineinfile:
+    path: /etc/rkhunter.conf
+    regexp: "^WEB_CMD.*$"
+    line: 'WEB_CMD=""'
+    state: present
+
+- name: "rkhunter : add cronjobs"
+  template:
+    src: "rkhunter.sh.j2"
+    dest: "/etc/cron.{{ audit_tools_cron_frequency }}/rkhunter"
+    mode: 0600
+    owner: root
+    group: root
+
+- name: "rkhunter : run benchmark"
+  shell: rkhunter --cronjob --update --quiet
+  ignore_errors: true
+
+- name: "chkrootkit : update /etc/chkrootkit.conf"
+  template:
+    src: chkrootkit.conf.j2
+    dest: /etc/chkrootkit.conf
+    mode: 0600
+    owner: root
+    group: root
+
+- name: "chrkrootkit : run benchmark"
+  shell: chkrootkit
+  ignore_errors: true
+
+- name: "debsums : add cronjobs"
+  template:
+    src: "debsums.sh.j2"
+    dest: "/etc/cron.{{ audit_tools_cron_frequency }}/debsums"
+    mode: 0600
+    owner: root
+    group: root
+
+- name: "debsums : run benchmark"
+  shell: debsums --all --silent --changed --ignore-obsolete
+  ignore_errors: true
+
+- name: "auditd : update /etc/audit/rules.d/audit.rules"
+  template:
+    src: audit.rules.j2
+    dest: /etc/audit/rules.d/audit.rules
+    mode: 0600
+    owner: root
+    group: root
+  notify:
+    - generate auditd
+    - restart auditd

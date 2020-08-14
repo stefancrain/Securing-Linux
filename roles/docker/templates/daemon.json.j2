@@ -1,0 +1,29 @@
+{
+  "icc": false,
+  "userns-remap": "default",
+  "storage-driver": "overlay2",
+  "seccomp-profile": "/etc/docker/seccomp.json",
+  "cgroup-parent": "docker",
+  "log-driver": "json-file",
+  "log-level": "info",
+  "log-opts": {
+    "max-size": "10m",
+    "max-file": "3",
+    "labels": "production_status",
+    "env": "os,customer"
+  },
+  "live-restore": true,
+  "userland-proxy": false,
+  "no-new-privileges": true,
+  "experimental": false,
+  "debug": false,
+  "live-restore": true,
+  "userland-proxy": false,
+  "no-new-privileges": true,
+  "experimental": false,
+  "debug": false,
+
+  "iptables": true,
+  "insecure-registries": [],
+  "data-root": "{{ docker_data_root | default('/var/lib/docker')  }}"
+}

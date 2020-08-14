@@ -1,0 +1,6 @@
+---
+- name: update grub
+  shell: /usr/sbin/update-grub
+
+- name: grub-v2-update-config
+  command: "{{ grub_password_mkconfig }} -o {{ grub_boot_path }}/grub.cfg"

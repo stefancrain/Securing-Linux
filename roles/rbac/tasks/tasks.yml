@@ -1,0 +1,16 @@
+---
+# role: rbac
+# file: tasks/tasks.yml
+
+- name: "package : ensure that repositories are up to date"
+  apt:
+    update_cache: true
+    cache_valid_time: "{{ rbac_cache_seconds }}"
+
+- name: "package : install packages for rbac"
+  package:
+    name: "{{ rbac_packages }}"
+    state: present
+  register: rbac_package_res
+  retries: 5
+  until: rbac_package_res is success

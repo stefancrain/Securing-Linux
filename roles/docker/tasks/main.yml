@@ -1,0 +1,78 @@
+---
+- name: Stop Docker
+  service:
+    name: docker
+    state: stopped
+
+# - name: Set Docker ENVs  on host
+#   lineinfile:
+#     dest: "/etc/environment"
+#     state: present
+#     regexp: "^{{ item.key }}"
+#     line: "{{ item.key }}={{ item.value }}"
+#   with_items:
+#     - key: DOCKER_CONTENT_TRUST
+#       value: 1
+#     - key: FOO
+#       value: bar
+
+- name: Make sure {{ docker_data_root }} exists
+  file:
+    path: "{{ docker_data_root }}"
+    state: directory
+    owner: root
+    group: root
+    mode: 0775
+  when: docker_data_root is defined
+
+- name: configure docker
+  template:
+    src: "{{ item }}.j2"
+    dest: "/etc/docker/{{ item }}"
+    mode: 0644
+    owner: root
+    group: root
+  with_items:
+    - daemon.json
+    - seccomp.json
+
+- name: Install docker controller for ansible
+  pip:
+    name: ["docker"]
+
+# - name: Make sure fake ssl exists
+#   file:
+#     path: "{{ item }}"
+#     state: directory
+#     owner: root
+#     group: root
+#     mode: 0644
+#   with_items:
+#     - /etc/docker/certs.d/
+#     - /etc/docker/ssl/
+
+# - name: configure fake ssl
+#   template:
+#     src: templates/daemon.json.j2
+#     dest: "{{ item }}"
+#     mode: 0444
+#     owner: root
+#     group: root
+#   with_items:
+#     - /etc/docker/ssl/server_key.pem
+#     - /etc/docker/ssl/server_cert.pem
+#     - /etc/docker/ssl/ca.pem
+#   notify:
+#     - restart docker
+
+- name: start docker
+  service:
+    name: docker
+    enabled: true
+    state: started
+
+- name: docker hello-world
+  shell: docker run --name hello-world-cli hello-world
+
+- name: remove hello-world
+  shell: docker rm -f hello-world-cli

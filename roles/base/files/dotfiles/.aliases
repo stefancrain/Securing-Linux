@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+# Easier navigation: .., ..., ...., ....., ~ and -
+alias ..="cd .."
+alias ...="cd ../.."
+alias ....="cd ../../.."
+alias .....="cd ../../../.."
+alias ~="cd ~" # `cd` is probably faster to type though
+alias -- -="cd -"
+
+alias led_on="/opt/vc/bin/vcmailbox 0x00038041 8 8 130 1 >/dev/null"
+alias led_off="/opt/vc/bin/vcmailbox 0x00038041 8 8 130 0 >/dev/null"
+alias led_blink="while [ 1 ]; do led_on; sleep 0.2; led_off; sleep 0.2; done"
+
+# Reload the shell (i.e. invoke as a login shell)
+alias reload="exec ${SHELL} -l"
+
+# Print each PATH entry on a separate line
+alias path='echo -e ${PATH//:/\\n}'
