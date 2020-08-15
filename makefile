@@ -1,18 +1,14 @@
 .PHONY: help init enc dec pull build start stop destroy reset lint pretty role audit
 
-BOXES = ubuntu/groovy64 \
-				ubuntu/focal64 \
-				ubuntu/bionic64 \
-				debian/buster64
-
-VMS   = groovy \
-				focal \
-				bionic \
-				buster
+# dynamically load list of VMS and source boxes from Vagrantfile
+VMS =  $(shell vagrant status --machine-readable | grep metadata | cut -d, -f2)
+BOXES = $(shell vagrant status --machine-readable | grep metadata | cut -d, -f2 | sed -e "s@SL-@@g" -e "s@-@/@g")
 
 help: ## show this help.
 	@egrep '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-10s\033[0m %s\n", $$1, $$2}'
-	
+
+############################################################
+
 init: ## install requirements
 	ansible-galaxy install -r requirements.yml
 	for box in $(BOXES); do \
@@ -34,10 +30,10 @@ pull: ## update vagrant boxes
 	vagrant box update
 	vagrant box prune --keep-active-boxes
 
-build: ## create vagrant boxes + "first-boot" snapshot
+build: ## create vagrant boxes and take "baseline" snapshot
 	vagrant up --destroy-on-error --parallel
 	for vm in $(VMS); do \
-		vagrant snapshot save "$$vm" "first-boot" ; \
+		vagrant snapshot save "$$vm" "baseline" ; \
 	done
 	
 start: ## start vagrant boxes
@@ -54,9 +50,9 @@ destroy: ## destroy vagrant boxes, clean disks
 	vagrant destroy --force --parallel || true
 	rm -rf *.vdi || true
 
-reset: ## reset vagrant boxes to "first-boot" snapshot
+restore: ## restore vagrant boxes to "baseline" snapshot
 	for vm in $(VMS); do \
-		vagrant snapshot restore "$$vm" "first-boot" ; \
+		vagrant snapshot restore "$$vm" "baseline" ; \
 	done
 
 ############################################################

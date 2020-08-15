@@ -46,18 +46,18 @@
       - curve25519-sha256
 
   roles:
-    # - { role: ../roles/base }
-    # - { role: ../roles/physical_access }
-    # - { role: ../roles/network_access }
-    # - { role: ../roles/audit_tools }
-    # - { role: ../roles/rbac }
-    # - { role: ../roles/data }
-    # # - { role: ../roles/disks }
-    # # - { role: ../roles/grub }
-    # - ericsysmin.chrony
-    # - dev-sec.os-hardening
-    # - dev-sec.ssh-hardening
-    # - geerlingguy.clamav
+    - { role: ../roles/base }
+    - { role: ../roles/physical_access }
+    - { role: ../roles/network_access }
+    - { role: ../roles/audit_tools }
+    - { role: ../roles/rbac }
+    - { role: ../roles/data }
+    # - { role: ../roles/disks }
+    # - { role: ../roles/grub }
+    - ericsysmin.chrony
+    - dev-sec.os-hardening
+    - dev-sec.ssh-hardening
+    - geerlingguy.clamav
     - geerlingguy.docker
     - { role: ../roles/docker }
   tasks:
