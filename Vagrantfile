@@ -5,12 +5,11 @@
 Vagrant.require_version ">= 1.6.0"
 VAGRANTFILE_API_VERSION = "2"
 
-# Require YAML module
-require 'yaml'
- 
 # Read YAML file with box details
+require 'yaml'
 hosts = YAML.load_file(File.join(File.dirname(__FILE__), 'hosts.yml'))
 
+# Set cpus to number of host cpus
 cpus = case RbConfig::CONFIG['host_os']
   when /darwin/ then `sysctl -n hw.ncpu`.to_i
   when /linux/ then `nproc`.to_i
@@ -20,10 +19,12 @@ end
 Vagrant.configure(2) do |config|
   hosts.each do |host|
 
+    # Create vars from box name
     distro_split = host["box"].split('/')
     distro_group = distro_split[0]
     host_name = "SL-"+distro_group+"-"+distro_split[1]
 
+    # Configure host
     config.vm.define host_name do |node|
       node.vm.box = host["box"]
       node.vm.synced_folder ".", "/vagrant", type: "nfs"
@@ -42,10 +43,6 @@ Vagrant.configure(2) do |config|
           "--uartmode1", "file", File::NULL,
           "--groups", "/"+distro_group,
         ]
-
-        # node.vm.provision :shell, :inline => "cloud-init init --local", :privileged => true
-        # node.vm.provision :shell, :inline => "cloud-init init", :privileged => true
-        # node.vm.provision :shell, :inline => "cloud-init modules", :privileged => true
       end
     end
   end
