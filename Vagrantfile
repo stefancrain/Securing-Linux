@@ -22,28 +22,32 @@ Vagrant.configure(2) do |config|
     # Create vars from box name
     distro_split = host["box"].split('/')
     distro_group = distro_split[0]
-    host_name = "SL-"+distro_group+"-"+distro_split[1]
+    distro_name = distro_split[1].gsub("64", "")
+    host_name = distro_group+"-"+distro_name
 
     # Configure host
     config.vm.define host_name do |node|
       node.vm.box = host["box"]
-      node.vm.synced_folder ".", "/vagrant", type: "nfs"
-      node.vm.hostname = host_name
+      node.vm.synced_folder '.', '/vagrant', disabled: true
       node.vm.network "private_network", ip: host["ip"]
-      node.vm.provision "shell", inline: "date -s \"$(curl -I google.com 2>&1 | grep Date: | cut -d' ' -f3-6)Z\""
+      node.vm.hostname = host_name
       node.vm.provider "virtualbox" do |vb|
         vb.customize [
           "modifyvm", :id,
           "--memory", 1024,
           "--cpus", cpus,
-          "--name", host_name,
-          "--natdnshostresolver1", "on",
+          "--name", distro_name,
           "--ioapic", "on",
           "--audio", "none",
           "--uartmode1", "file", File::NULL,
-          "--groups", "/"+distro_group,
+          "--groups", "/SL-TEST/"+distro_group,
         ]
       end
+      # enable ssh via vagrant and ansible
+      node.ssh.config = ".vagrant_ssh_key"
+      node.ssh.insert_key = false
+      node.ssh.private_key_path = ['~/.vagrant.d/insecure_private_key', '~/.ssh/id_rsa']
+      node.vm.provision "file", source: "~/.ssh/id_rsa.pub", destination: "~/.ssh/authorized_keys"
     end
   end
 end
