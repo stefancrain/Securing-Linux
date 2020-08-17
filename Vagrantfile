@@ -42,7 +42,7 @@ Vagrant.configure(2) do |config|
           "modifyvm", :id,
           "--memory", 1024,
           "--cpus", cpus,
-          "--name", codename,
+          "--name", hostname,
           "--ioapic", "on",
           "--audio", "none",
           "--uartmode1", "file", File::NULL,

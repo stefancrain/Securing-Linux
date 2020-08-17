@@ -8,7 +8,16 @@ TODO: add blurb about workflow
 
 Make no mistake this set of playbooks are opinionated and comes **without any express or implied warranty**.
 
-## Hardening Strategy
+## Steps in security
+
+1. [Set useful base tools](./roles/base)
+2. [Restrict physical access](./roles/physical_access)
+3. [Restrict network access](./roles/network_access)
+4. [Enforce role based access controls [RBAC]](./roles/rbac)
+5. [Protect data with partitioning and encryption](./roles/data)
+6. [Track audit-worthy change events](./roles/audit_tools)
+
+## Reviewing hardening efforts
 
 ### Audit programs
 
@@ -27,15 +36,6 @@ Make no mistake this set of playbooks are opinionated and comes **without any ex
 - [vibrato/inspec-meltdownspectre](https://github.com/vibrato/inspec-meltdownspectre)
 
 Security hardening guides, best practices, checklists, benchmarks, tools and other resources. Help from [decalage2/awesome-security-hardening](https://github.com/decalage2/awesome-security-hardening)
-
-## Steps in security
-
-1. [Set useful base of common tools](./roles/base)
-2. [Restrict physical access](./roles/physical_access)
-3. [Restrict network access](./roles/network_access)
-4. [Enforce role based access controls](./roles/rbac)
-5. [Protect data with partitioning and encryption](./roles/data)
-6. [Track audit-worthy change events](./roles/audit_tools)
 
 ## Setting up for development
 
@@ -89,12 +89,8 @@ make play
 make audit
 ```
 
-## Tested Operating Systems
+## Supported Operating Systems
 
-- RHEL
-  - [8](https://app.vagrantup.com/generic/boxes/rhel8)
-  - [7](https://app.vagrantup.com/generic/boxes/rhel7)
-  - [6](https://app.vagrantup.com/generic/boxes/rhel6)
 - CentOS
   - [8](https://app.vagrantup.com/bento/boxes/centos-8)
   - [7](https://app.vagrantup.com/bento/boxes/centos-7)
@@ -108,3 +104,10 @@ make audit
   - [10 - Buster](https://app.vagrantup.com/bento/boxes/debian-10)
   - [9 - Stretch](https://app.vagrantup.com/bento/boxes/debian-9)
   - [8 - Jessie](https://app.vagrantup.com/bento/boxes/debian-8)
+
+-- work in progress --
+
+- RHEL
+  - [8](https://app.vagrantup.com/roboxes/boxes/rhel8)
+  - [7](https://app.vagrantup.com/roboxes/boxes/rhel7)
+  - [6](https://app.vagrantup.com/roboxes/boxes/rhel6)
