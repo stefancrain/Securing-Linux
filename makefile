@@ -11,6 +11,7 @@ help: ## show this help.
 
 init: ## install requirements
 	ansible-galaxy install -r requirements.yml
+	vagrant plugin install vagrant-vbguest
 	for box in $(BOXES); do \
 		vagrant box add --provider=virtualbox --clean "$$box" || true ; \
 	done
@@ -76,7 +77,7 @@ role: ## create a new role
 ############################################################
 
 audit: ## run playbook to test compliance with audit tools
-	ansible-playbook --vault-password-file=.vault.pass -l TEST playbooks/audit.yml
+	ansible-playbook --vault-password-file=.vault.pass -l Securing-Linux playbooks/audit.yml
 
 play: ##run playbook to setup hosts
-	ansible-playbook --vault-password-file=.vault.pass -l TEST playbooks/setup.yml
+	ansible-playbook --vault-password-file=.vault.pass -l Securing-Linux playbooks/setup.yml

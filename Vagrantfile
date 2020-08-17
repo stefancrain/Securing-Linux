@@ -20,27 +20,26 @@ Vagrant.configure(2) do |config|
   hosts.each do |host|
 
     # Create vars from box name
-    distro_split = host["box"].split('/')
-    distro_group = distro_split[0]
-    distro_name = distro_split[1].gsub("64", "")
-    host_name = distro_group+"-"+distro_name
+    group = host["group"]
+    codename = host["codename"]
+    hostname = group+"-"+codename
 
     # Configure host
-    config.vm.define host_name do |node|
+    config.vm.define hostname do |node|
       node.vm.box = host["box"]
       node.vm.synced_folder '.', '/vagrant', disabled: true
       node.vm.network "private_network", ip: host["ip"]
-      node.vm.hostname = host_name
+      node.vm.hostname = hostname
       node.vm.provider "virtualbox" do |vb|
         vb.customize [
           "modifyvm", :id,
           "--memory", 1024,
           "--cpus", cpus,
-          "--name", distro_name,
+          "--name", codename,
           "--ioapic", "on",
           "--audio", "none",
           "--uartmode1", "file", File::NULL,
-          "--groups", "/SL-TEST/"+distro_group,
+          "--groups", "/Securing-Linux/"+group,
         ]
       end
       # enable ssh via vagrant and ansible

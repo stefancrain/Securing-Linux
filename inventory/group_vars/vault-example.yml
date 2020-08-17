@@ -1,6 +1,5 @@
 ---
 ansible_ssh_common_args: '-o UserKnownHostsFile=/dev/null'
-ansible_python_interpreter: /usr/bin/python3
 
 ansible_user: vagrant
 ansible_ssh_pass: vagrant_users_password_goes_here

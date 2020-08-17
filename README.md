@@ -1,4 +1,4 @@
-# Secure Linux
+# Securing Linux
 
 This repo creates a usable Linux platform with adequately security for daily, non-production usage.
 
@@ -103,9 +103,9 @@ make audit
 
 - RHEL TODO: add approved images
 - CentOS
-  - [8](https://app.vagrantup.com/centos/boxes/8)
-  - [7](https://app.vagrantup.com/centos/boxes/7)
-  - [6](https://app.vagrantup.com/centos/boxes/6)
+  - [8](https://app.vagrantup.com/geerlingguy/boxes/centos8)
+  - [7](https://app.vagrantup.com/geerlingguy/boxes/centos7)
+  - [6](https://app.vagrantup.com/geerlingguy/boxes/centos6)
 - Ubuntu
   - [20.10 - Groovy ](https://app.vagrantup.com/ubuntu/boxes/groovy64)
   - [20.04 - Focal](https://app.vagrantup.com/ubuntu/boxes/focal64)

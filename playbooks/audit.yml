@@ -5,8 +5,36 @@
   vars_files:
     - "../inventory/group_vars/vault.yml"
   vars:
-    required_packages:
-      ["curl", "g++", "gcc", "git", "make", "nmap", "ruby", "ruby-dev", "jq"]
+    apt_packages:
+      - curl
+      - gcc
+      - git
+      - make
+      - nmap
+      - ruby
+      - ruby-dev
+      - jq
+    yum_packages: 
+      - git-core
+      - zlib
+      - zlib-devel
+      - gcc-c++
+      - patch
+      - readline
+      - readline-devel
+      - libffi-devel
+      - openssl-devel
+      - make
+      - ruby-devel
+      - ruby
+      - bzip2
+      - autoconf
+      - automake
+      - libtool
+      - bison
+      - curl
+      - sqlite-devel
+      - jq
 
     inspec_supermarket_profiles:
       - dev-sec/linux-baseline
@@ -17,19 +45,39 @@
       - dev-sec/cis-kubernetes-benchmark
       - vibrato/inspec-meltdownspectre
 
-    # ssh_audit_port: 22
-    ssh_audit_port: 4312
+    ssh_audit_port: 22
+    # ssh_audit_port: 4312
 
   tasks:
+
     - name: "package : ensure that repositories are up to date"
       apt:
         update_cache: true
         cache_valid_time: 3600
+      when: ansible_os_family == 'Debian'
 
-    - name: "package : install required packages"
-      package:
-        name: "{{ required_packages }}"
+    - name: "package : ensure that repositories are up to date"
+      yum:
+        update_cache: true
+      when: ansible_os_family == 'RedHat'
+
+    - name: "package : ensure that repositories are up to date"
+      apt:
+        name: "{{ apt_packages }}"
         state: present
+      when: ansible_os_family == 'Debian'
+
+    - name: "package : ensure that repositories are up to date"
+      yum:
+        name: "{{ yum_packages }}"
+        state: present
+      when: ansible_os_family == 'RedHat'
+
+    - name: "package : gem update system"
+      gem:
+        name: system
+        state: latest
+        user_install: false
 
     - name: "package : install inspec gem"
       gem:
@@ -72,7 +120,7 @@
         chdir: /usr/local/bin/lynis
 
     - name: "audit : Inspec supermarket"
-      shell: "inspec exec \
+      shell: "/usr/local/bin/inspec exec \
         https://github.com/{{ item }}/archive/master.tar.gz \
         --chef-license=accept \
         --no-enable-telemetry \
