@@ -23,6 +23,13 @@ Vagrant.configure(2) do |config|
     group = host["group"]
     codename = host["codename"]
     hostname = group+"-"+codename
+    if Vagrant.has_plugin?("vagrant-vbguest")
+      config.vbguest.auto_update = true
+      config.vbguest.no_remote = true
+      config.vbguest.iso_path = "./VBoxGuestAdditions_6.1.12.iso"
+    end
+
+    # https://download.virtualbox.org/virtualbox/6.1.12/VBoxGuestAdditions_6.1.12.iso
 
     # Configure host
     config.vm.define hostname do |node|

@@ -2,7 +2,6 @@
 
 # dynamically load list of VMS and source boxes from Vagrantfile
 VMS =  $(shell vagrant status --machine-readable | grep metadata | cut -d, -f2)
-BOXES = $(shell vagrant status --machine-readable | grep metadata | cut -d, -f2 | sed -e "s@SL-@@g" -e "s@-@/@g")
 
 help: ## show this help.
 	@egrep '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-10s\033[0m %s\n", $$1, $$2}'
@@ -12,9 +11,7 @@ help: ## show this help.
 init: ## install requirements
 	ansible-galaxy install -r requirements.yml
 	vagrant plugin install vagrant-vbguest
-	for box in $(BOXES); do \
-		vagrant box add --provider=virtualbox --clean "$$box" || true ; \
-	done
+	vagrant box update
 	test ! -f .vault.pass
 	cp inventory/group_vars/vault-example.yml inventory/group_vars/vault.yml
 	openssl rand -base64 16384 > .vault.pass

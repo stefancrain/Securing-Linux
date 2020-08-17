@@ -7,3 +7,4 @@ isos
 
 inventory/group_vars/vault.yml
 .vault.pass
+VBoxGuestAdditions_*

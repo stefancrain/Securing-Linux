@@ -14,6 +14,7 @@ Make no mistake this set of playbooks are opinionated and comes **without any ex
 
 - [jtesta/ssh-audit](https://github.com/jtesta/ssh-audit)
 - [CISOfy/lynis](https://github.com/CISOfy/lynis)
+- [future-architect/vuls](https://github.com/future-architect/vuls)
 
 ### [Chef InSpec](https://docs.chef.io/inspec)
 
@@ -27,29 +28,18 @@ Make no mistake this set of playbooks are opinionated and comes **without any ex
 
 Security hardening guides, best practices, checklists, benchmarks, tools and other resources. Help from [decalage2/awesome-security-hardening](https://github.com/decalage2/awesome-security-hardening)
 
-## Roles as steps in security
+## Steps in security
 
-1. Set useful base of common tools - [base](./roles/base)
-2. Restrict physical access - [physical_access](./roles/physical_access)
-3. Restrict network access - [network_access](./roles/network_access)
-4. Enforce role based access controls - [rbac](./roles/rbac)
-5. Protect data with partitioning and encryption - [data](./roles/data)
-6. Track audit-worthy change events - [audit_tools](./roles/audit_tools)
+1. [Set useful base of common tools](./roles/base)
+2. [Restrict physical access](./roles/physical_access)
+3. [Restrict network access](./roles/network_access)
+4. [Enforce role based access controls](./roles/rbac)
+5. [Protect data with partitioning and encryption](./roles/data)
+6. [Track audit-worthy change events](./roles/audit_tools)
 
 ## Setting up for development
 
-This project uses Ansible, Vagrant, and VirtualBox for local development and testing. The [makefile](makefile) contains most of the magic to get this project working.
-
-- Ansible
-  - ansible-galaxy
-  - ansible-lint
-  - yamllint
-  - markdownlint
-- Vagrant
-  - vagrant-lint
-- VirtualBox
-- make
-- prettier
+This project uses [Vagrant](https://vagrantup.com/), [VirtualBox](https://www.virtualbox.org/), and [Ansible](https://www.ansible.com/) for local development and testing. The [makefile](makefile) contains most of the magic to get this project working.
 
 ### Initializing the project
 
@@ -101,17 +91,20 @@ make audit
 
 ## Tested Operating Systems
 
-- RHEL TODO: add approved images
+- RHEL
+  - [8](https://app.vagrantup.com/generic/boxes/rhel8)
+  - [7](https://app.vagrantup.com/generic/boxes/rhel7)
+  - [6](https://app.vagrantup.com/generic/boxes/rhel6)
 - CentOS
-  - [8](https://app.vagrantup.com/geerlingguy/boxes/centos8)
-  - [7](https://app.vagrantup.com/geerlingguy/boxes/centos7)
-  - [6](https://app.vagrantup.com/geerlingguy/boxes/centos6)
+  - [8](https://app.vagrantup.com/bento/boxes/centos-8)
+  - [7](https://app.vagrantup.com/bento/boxes/centos-7)
+  - [6](https://app.vagrantup.com/bento/boxes/centos-6)
 - Ubuntu
-  - [20.10 - Groovy ](https://app.vagrantup.com/ubuntu/boxes/groovy64)
-  - [20.04 - Focal](https://app.vagrantup.com/ubuntu/boxes/focal64)
-  - [18.04 - Bionic](https://app.vagrantup.com/ubuntu/boxes/bionic64)
-  - [16.04 - Xenial](https://app.vagrantup.com/ubuntu/boxes/xenial64)
+  - [20.10 - Groovy](https://app.vagrantup.com/ubuntu/boxes/groovy64)
+  - [20.04 - Focal](https://app.vagrantup.com/bento/boxes/ubuntu-20.04)
+  - [18.04 - Bionic](https://app.vagrantup.com/bento/boxes/ubuntu-18.04)
+  - [16.04 - Xenial](https://app.vagrantup.com/bento/boxes/ubuntu-16.04)
 - Debian
-  - [10 - Buster](https://app.vagrantup.com/debian/boxes/buster64)
-  - [9 - Stretch](https://app.vagrantup.com/debian/boxes/stretch64)
-  - [8 - Jessie](https://app.vagrantup.com/debian/boxes/jessie64)
+  - [10 - Buster](https://app.vagrantup.com/bento/boxes/debian-10)
+  - [9 - Stretch](https://app.vagrantup.com/bento/boxes/debian-9)
+  - [8 - Jessie](https://app.vagrantup.com/bento/boxes/debian-8)
