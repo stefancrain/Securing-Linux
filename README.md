@@ -109,6 +109,8 @@ make audit
 
 ## Work in progress : Supported Operating Systems
 
+| OS        | Release |
+| :---      | :---    |
 | CentOS    | [6](https://app.vagrantup.com/bento/boxes/centos-6) |
 | RHEL      | [8](https://app.vagrantup.com/roboxes/boxes/rhel8) |
 |           | [7](https://app.vagrantup.com/roboxes/boxes/rhel7) |
