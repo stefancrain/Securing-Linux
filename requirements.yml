@@ -4,3 +4,4 @@
 - src: ericsysmin.chrony
 - src: geerlingguy.docker
 - src: geerlingguy.clamav
+- src: rvm.ruby

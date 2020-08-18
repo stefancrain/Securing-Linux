@@ -5,16 +5,24 @@
   vars_files:
     - "../inventory/group_vars/vault.yml"
   vars:
-    apt_packages:
+    pacman_packages:
       - curl
       - gcc
-      - git
       - make
+      - git
       - nmap
-      - ruby
-      - ruby-dev
       - jq
-    yum_packages: 
+      - python3
+
+    apt_packages:
+      - curl
+      - build-essential
+      - git
+      - nmap
+      - jq
+      - python3
+
+    yum_packages:
       - git-core
       - zlib
       - zlib-devel
@@ -25,8 +33,6 @@
       - libffi-devel
       - openssl-devel
       - make
-      - ruby-devel
-      - ruby
       - bzip2
       - autoconf
       - automake
@@ -35,6 +41,7 @@
       - curl
       - sqlite-devel
       - jq
+      - python3
 
     inspec_supermarket_profiles:
       - dev-sec/linux-baseline
@@ -47,8 +54,29 @@
 
     ssh_audit_port: 22
     # ssh_audit_port: 4312
+  pre_tasks:
+    - name: prerequisites 
+      package:
+        name: ["which", "gpgv2"]
+        state: present
+      ignore_errors: true # fails because of test failures
+
+  roles:
+    - { role: rvm.ruby,
+        tags: ruby,
+        become: yes,
+        rvm1_rubies: ['ruby-2.7.1'],
+        rvm1_install_flags: '--auto-dotfiles',     # Remove --user-install from defaults
+        rvm1_install_path: /usr/local/rvm,         # Set to system location
+        rvm1_user: root                            # Need root account to access system location
+      }
+  environment:
+    PATH: /usr/local/rvm/gems/ruby-2.7.1/bin:/usr/local/rvm/gems/ruby-2.7.1@global/bin:/usr/local/rvm/rubies/ruby-2.7.1/bin:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games:/usr/local/rvm/bin:{{ ansible_env.PATH }}
 
   tasks:
+
+    - name: "Set Ruby Version"
+      shell: "rvm use 2.7.1"
 
     - name: "package : ensure that repositories are up to date"
       apt:
@@ -56,28 +84,47 @@
         cache_valid_time: 3600
       when: ansible_os_family == 'Debian'
 
+    - name: "package : Install audit tools deps"
+      package:
+        name: "{{ apt_packages }}"
+        state: present
+      when: ansible_os_family == 'Debian'
+      
+
     - name: "package : ensure that repositories are up to date"
       yum:
         update_cache: true
       when: ansible_os_family == 'RedHat'
 
-    - name: "package : ensure that repositories are up to date"
-      apt:
-        name: "{{ apt_packages }}"
-        state: present
-      when: ansible_os_family == 'Debian'
-
-    - name: "package : ensure that repositories are up to date"
+    - name: "package : Add YUM repositories"
       yum:
+        name: "https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm"
+        state: present
+      when: ansible_os_family == 'RedHat'
+
+    - name: "package : Install audit tools deps"
+      package:
         name: "{{ yum_packages }}"
         state: present
       when: ansible_os_family == 'RedHat'
+
+    - name: "package : ensure that repositories are up to date"
+      pacman:
+        update_cache: yes
+      when: ansible_os_family == 'Archlinux'
+
+    - name: "package : Install audit tools deps"
+      package:
+        name: "{{ pacman_packages }}"
+        state: present
+      when: ansible_os_family == 'Archlinux'
 
     - name: "package : gem update system"
       gem:
         name: system
         state: latest
         user_install: false
+      become: true
 
     - name: "package : install inspec gem"
       gem:
@@ -100,6 +147,14 @@
         clone: true
         update: true
 
+    - name: "package : install CISOfy/lynis"
+      file:
+        path: /usr/local/bin/lynis
+        state: directory
+        owner: root
+        group: root
+        recurse: yes
+
     - name: "staging : create temp directory"
       tempfile:
         state: directory
@@ -120,9 +175,9 @@
         chdir: /usr/local/bin/lynis
 
     - name: "audit : Inspec supermarket"
-      shell: "/usr/local/bin/inspec exec \
+      shell: "inspec exec \
         https://github.com/{{ item }}/archive/master.tar.gz \
-        --chef-license=accept \
+        --chef-license=accept-silent \
         --no-enable-telemetry \
         --no-interactive \
         --no-distinct-exit \

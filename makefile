@@ -50,7 +50,10 @@ destroy: ## destroy vagrant boxes, clean disks
 
 restore: ## restore vagrant boxes to "baseline" snapshot
 	for vm in $(VMS); do \
-		vagrant snapshot restore "$$vm" "baseline" ; \
+		vagrant snapshot restore --no-start --no-provision "$$vm" "baseline" ; \
+	done
+	for vm in $(VMS); do \
+		vagrant resume --no-provision "$$vm" ; \
 	done
 
 ############################################################
