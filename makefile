@@ -1,4 +1,4 @@
-.PHONY: help init enc dec pull build start stop destroy reset lint pretty role audit
+.PHONY: help init enc dec pull build start stop destroy reset rebuild lint pretty ping list role audit 
 
 # dynamically load list of VMS and source boxes from Vagrantfile
 VMS =  $(shell vagrant status --machine-readable | grep metadata | cut -d, -f2)
@@ -10,6 +10,7 @@ help: ## show this help.
 
 init: ## install requirements
 	ansible-galaxy install -r requirements.yml
+	pip3 install -r requirement.txt
 	vagrant plugin install vagrant-vbguest
 	vagrant box update
 	test ! -f .vault.pass
@@ -31,30 +32,36 @@ pull: ## update vagrant boxes
 build: ## create vagrant boxes and take "baseline" snapshot
 	vagrant up --destroy-on-error --parallel
 	for vm in $(VMS); do \
-		vagrant snapshot save "$$vm" "baseline" ; \
+		VBoxManage snapshot "$$vm" take "baseline" --live; \
 	done
 	
 start: ## start vagrant boxes
 	for vm in $(VMS); do \
-		vagrant resume "$$vm" ; \
+		VBoxManage startvm "$$vm" --type headless; \
 	done
 
 stop: ## suspend vagrant boxes
 	for vm in $(VMS); do \
-		vagrant suspend "$$vm" ; \
+		VBoxManage controlvm "$$vm" poweroff ; \
 	done
 
 destroy: ## destroy vagrant boxes, clean disks
-	vagrant destroy --force --parallel || true
+	make stop
+	for vm in $(VMS); do \
+		VBoxManage unregistervm "$$vm" --delete ; \
+	done
 	rm -rf *.vdi || true
 
 restore: ## restore vagrant boxes to "baseline" snapshot
 	for vm in $(VMS); do \
-		vagrant snapshot restore --no-start --no-provision "$$vm" "baseline" ; \
+		make stop ; \
+		VBoxManage snapshot "$$vm" restore "baseline" ; \
+		make start ; \
 	done
-	for vm in $(VMS); do \
-		vagrant resume --no-provision "$$vm" ; \
-	done
+
+rebuild: ## destroy + build 
+	make destroy
+	make build
 
 ############################################################
 
@@ -75,9 +82,18 @@ role: ## create a new role
 	./tools/mkrole.sh
 
 ############################################################
+ping: ## run playbook to test compliance with audit tools
+	ansible all --one-line -m ping -e @inventory/group_vars/vault.yml -i inventory/virtualbox.yml
+
+list: ## list hosts
+	ansible all --list-hosts
 
 audit: ## run playbook to test compliance with audit tools
-	ansible-playbook --vault-password-file=.vault.pass -l Securing-Linux playbooks/audit.yml
+	ansible-playbook -l Securing-Linux playbooks/audit.yml
 
 play: ##run playbook to setup hosts
-	ansible-playbook --vault-password-file=.vault.pass -l Securing-Linux playbooks/setup.yml
+	ansible-playbook -l Securing-Linux playbooks/setup.yml
+
+replay: ## destroy + build 
+	make restore
+	make play
