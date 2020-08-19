@@ -30,7 +30,7 @@ pull: ## update vagrant boxes
 	vagrant box prune --keep-active-boxes
 
 build: ## create vagrant boxes and take "baseline" snapshot
-	vagrant status --machine-readable | grep metadata | cut -d, -f2 | xargs --max-procs=0 -I {} vagrant up {}
+	vagrant status --machine-readable | grep metadata | cut -d, -f2 | xargs --max-procs=4 -I {} vagrant up {}
 	for vm in $(VMS); do \
 		VBoxManage snapshot "$$vm" take "baseline" --live; \
 	done
