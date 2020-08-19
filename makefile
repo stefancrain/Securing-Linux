@@ -46,17 +46,17 @@ stop: ## suspend vagrant boxes
 	done
 
 destroy: ## destroy vagrant boxes, clean disks
-	make stop
 	for vm in $(VMS); do \
+		VBoxManage controlvm "$$vm" poweroff ; \
 		VBoxManage unregistervm "$$vm" --delete ; \
 	done
 	rm -rf *.vdi || true
 
 restore: ## restore vagrant boxes to "baseline" snapshot
 	for vm in $(VMS); do \
-		make stop ; \
+		VBoxManage controlvm "$$vm" poweroff ; \
 		VBoxManage snapshot "$$vm" restore "baseline" ; \
-		make start ; \
+		VBoxManage startvm "$$vm" --type headless; \
 	done
 
 rebuild: ## destroy + build 
