@@ -1,0 +1,8 @@
+---
+packages:
+  - curl
+  - build-essential
+  - git
+  - nmap
+  - jq
+  - python3

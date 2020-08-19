@@ -1,0 +1,9 @@
+---
+packages:
+  - curl
+  - gcc
+  - make
+  - git
+  - nmap
+  - jq
+  - python3

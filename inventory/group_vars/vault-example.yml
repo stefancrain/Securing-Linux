@@ -1,10 +1,9 @@
 ---
-ansible_ssh_common_args: '-o UserKnownHostsFile=/dev/null'
+ansible_ssh_common_args: "-o UserKnownHostsFile=/dev/null"
 
 ansible_user: vagrant
 ansible_ssh_pass: vagrant_users_password_goes_here
 ansible_sudo_pass: vagrant_users_password_goes_here
-
 
 created_user_name: user_name_goes_here
 created_user_password: user_password_goes_here

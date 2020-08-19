@@ -4,45 +4,8 @@
   become: true
   vars_files:
     - "../inventory/group_vars/vault.yml"
+
   vars:
-    pacman_packages:
-      - curl
-      - gcc
-      - make
-      - git
-      - nmap
-      - jq
-      - python3
-
-    apt_packages:
-      - curl
-      - build-essential
-      - git
-      - nmap
-      - jq
-      - python3
-
-    yum_packages:
-      - git-core
-      - zlib
-      - zlib-devel
-      - gcc-c++
-      - patch
-      - readline
-      - readline-devel
-      - libffi-devel
-      - openssl-devel
-      - make
-      - bzip2
-      - autoconf
-      - automake
-      - libtool
-      - bison
-      - curl
-      - sqlite-devel
-      - jq
-      - python3
-
     inspec_supermarket_profiles:
       - dev-sec/linux-baseline
       - dev-sec/linux-patch-baseline
@@ -54,70 +17,68 @@
 
     ssh_audit_port: 22
     # ssh_audit_port: 4312
+
   pre_tasks:
-    - name: prerequisites 
+    - name: prerequisites
       package:
-        name: ["which", "gpgv2"]
+        name: ["which"]
         state: present
-      ignore_errors: true # fails because of test failures
+      ignore_errors: true #
+      when: ansible_os_family == 'Archlinux'
 
   roles:
-    - { role: rvm.ruby,
-        tags: ruby,
-        become: yes,
-        rvm1_rubies: ['ruby-2.7.1'],
-        rvm1_install_flags: '--auto-dotfiles',     # Remove --user-install from defaults
-        rvm1_install_path: /usr/local/rvm,         # Set to system location
-        rvm1_user: root                            # Need root account to access system location
-      }
+    - role: rvm.ruby
+      tags: ruby
+      become: yes
+      rvm1_rubies:
+        - ruby-2.7.1
+      rvm1_install_flags: "--auto-dotfiles" # Remove --user-install
+      rvm1_install_path: /usr/local/rvm # Set to system location
+      rvm1_user: root # Need root account to access system location
+
   environment:
     PATH: /usr/local/rvm/gems/ruby-2.7.1/bin:/usr/local/rvm/gems/ruby-2.7.1@global/bin:/usr/local/rvm/rubies/ruby-2.7.1/bin:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games:/usr/local/rvm/bin:{{ ansible_env.PATH }}
 
   tasks:
+    # include packages required by each distro
+    - include_vars: ../vars/audit-tool-apt.yml
+      when: ansible_os_family == 'Debian'
+
+    - include_vars: ../vars/audit-tool-yum.yml
+      when: ansible_os_family == 'RedHat'
+
+    - include_vars: ../vars/audit-tool-pacman.yml
+      when: ansible_os_family == 'Archlinux'
 
     - name: "Set Ruby Version"
       shell: "rvm use 2.7.1"
 
-    - name: "package : ensure that repositories are up to date"
+    - name: "package : ensure that apt repositories are up to date"
       apt:
         update_cache: true
         cache_valid_time: 3600
       when: ansible_os_family == 'Debian'
 
-    - name: "package : Install audit tools deps"
-      package:
-        name: "{{ apt_packages }}"
-        state: present
-      when: ansible_os_family == 'Debian'
-      
-
-    - name: "package : ensure that repositories are up to date"
+    - name: "package : ensure that yum repositories are up to date"
       yum:
         update_cache: true
       when: ansible_os_family == 'RedHat'
 
-    - name: "package : Add YUM repositories"
+    - name: "package : ensure that pacman repositories are up to date"
+      pacman:
+        update_cache: yes
+      when: ansible_os_family == 'Archlinux'
+
+    - name: "package : add YUM repositories"
       yum:
         name: "https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm"
         state: present
       when: ansible_os_family == 'RedHat'
 
-    - name: "package : Install audit tools deps"
+    - name: "package : install audit tools deps"
       package:
-        name: "{{ yum_packages }}"
+        name: "{{ packages }}"
         state: present
-      when: ansible_os_family == 'RedHat'
-
-    - name: "package : ensure that repositories are up to date"
-      pacman:
-        update_cache: yes
-      when: ansible_os_family == 'Archlinux'
-
-    - name: "package : Install audit tools deps"
-      package:
-        name: "{{ pacman_packages }}"
-        state: present
-      when: ansible_os_family == 'Archlinux'
 
     - name: "package : gem update system"
       gem:
@@ -190,7 +151,6 @@
 
     - name: "audit : jtesta/ssh-audit"
       shell: "./ssh-audit.py -p {{ ssh_audit_port }} localhost > {{ temp.path }}/jtesta/ssh-audit-{{ ssh_audit_port }}.html"
-      ignore_errors: true # fails because of test failures
       args:
         chdir: /usr/local/bin/ssh-audit
 

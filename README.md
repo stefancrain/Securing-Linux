@@ -62,10 +62,11 @@ make dec # decrypt vault.yml
 
 ```bash
 make build
+make ping
 ```
 
 - Vagrant creates test VMs
-- Vagrant takes snapshot of the state at *baseline* to make iterative testing much faster
+- Vagrant takes snapshot of the state at _baseline_ to make iterative testing much faster
 
 ### Managing the state of the VMs
 
@@ -91,27 +92,26 @@ make audit
 
 ## Supported Operating Systems
 
-| OS        | Release |
-| :---      | :---    |
-| Ubuntu    | [20.10 - Groovy](https://app.vagrantup.com/ubuntu/boxes/groovy64) |
-|           | [20.04 - Focal](https://app.vagrantup.com/bento/boxes/ubuntu-20.04) |
-|           | [19.10 - Eoan](https://app.vagrantup.com/bento/boxes/ubuntu-19.10) |
+| OS        | Release                                                              |
+| :-------- | :------------------------------------------------------------------- |
+| Ubuntu    | [20.04 - Focal](https://app.vagrantup.com/bento/boxes/ubuntu-20.04)  |
+|           | [19.10 - Eoan](https://app.vagrantup.com/bento/boxes/ubuntu-19.10)   |
 |           | [18.04 - Bionic](https://app.vagrantup.com/bento/boxes/ubuntu-18.04) |
 |           | [16.04 - Xenial](https://app.vagrantup.com/bento/boxes/ubuntu-16.04) |
-|           | [14.04 - Trusty](https://app.vagrantup.com/bento/boxes/ubuntu-14.04) |
-| Debian    | [10 - Buster](https://app.vagrantup.com/bento/boxes/debian-10) |
-|           | [9 - Stretch](https://app.vagrantup.com/bento/boxes/debian-9) |
-|           | [8 - Jessie](https://app.vagrantup.com/bento/boxes/debian-8) |
-|           | [7 - Wheezy](https://app.vagrantup.com/bento/boxes/debian-7) |
-| ArchLinux | [ArchLinux](https://app.vagrantup.com/archlinux/boxes/archlinux) |
-| CentOS    | [8](https://app.vagrantup.com/bento/boxes/centos-8) |
-|           | [7](https://app.vagrantup.com/bento/boxes/centos-7) |
+| Debian    | [10 - Buster](https://app.vagrantup.com/bento/boxes/debian-10)       |
+|           | [9 - Stretch](https://app.vagrantup.com/bento/boxes/debian-9)        |
+|           | [8 - Jessie](https://app.vagrantup.com/bento/boxes/debian-8)         |
+| ArchLinux | [ArchLinux](https://app.vagrantup.com/archlinux/boxes/archlinux)     |
+| CentOS    | [8](https://app.vagrantup.com/bento/boxes/centos-8)                  |
+|           | [7](https://app.vagrantup.com/bento/boxes/centos-7)                  |
 
 ## Work in progress : Supported Operating Systems
 
-| OS        | Release |
-| :---      | :---    |
-| CentOS    | [6](https://app.vagrantup.com/bento/boxes/centos-6) |
-| RHEL      | [8](https://app.vagrantup.com/roboxes/boxes/rhel8) |
-|           | [7](https://app.vagrantup.com/roboxes/boxes/rhel7) |
-|           | [6](https://app.vagrantup.com/roboxes/boxes/rhel6) |
+| OS     | Release                                                              |
+| :----- | :------------------------------------------------------------------- |
+| Ubuntu | [20.10 - Groovy](https://app.vagrantup.com/ubuntu/boxes/groovy64)    |
+|        | [14.04 - Trusty](https://app.vagrantup.com/bento/boxes/ubuntu-14.04) |
+| CentOS | [6](https://app.vagrantup.com/bento/boxes/centos-6)                  |
+| RHEL   | [8](https://app.vagrantup.com/roboxes/boxes/rhel8)                   |
+|        | [7](https://app.vagrantup.com/roboxes/boxes/rhel7)                   |
+|        | [6](https://app.vagrantup.com/roboxes/boxes/rhel6)                   |
