@@ -1,0 +1,84 @@
+#cloud-config
+hostname: ubuntu
+manage_etc_hosts: true
+locale: "en_US.UTF-8"
+timezone: "America/New_York"
+
+package_update: true
+package_upgrade: true
+package_reboot_if_required: true
+
+ssh_pwauth: false
+ssh_deletekeys: true
+ssh_genkeytypes: ["rsa", "ecdsa", "ed25519"]
+disable_root: true
+
+packages:
+  - qemu-guest-agent
+
+chpasswd:
+  list: |
+    ubuntu:ubuntu
+    root:RANDOM
+  expire: false
+
+users:
+  - name: ubuntu
+    shell: /bin/bash
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    ssh_authorized_keys:
+      - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC2G7k0zGAjd+0LzhbPcGLkdJrJ/LbLrFxtXe+LPAkrphizfRxdZpSC7Dvr5Vewrkd/kfYObiDc6v23DHxzcilVC2HGLQUNeUer/YE1mL4lnXC1M3cb4eU+vJ/Gyr9XVOOReDRDBCwouaL7IzgYNCsm0O5v2z/w9ugnRLryUY180/oIGeE/aOI1HRh6YOsIn7R3Rv55y8CYSqsbmlHWiDC6iZICZtvYLYmUmCgPX2Fg2eT+aRbAStUcUERm8h246fs1KxywdHHI/6o3E1NNIPIQ0LdzIn5aWvTCd6D511L4rf/k5zbdw/Gql0AygHBR/wnngB5gSDERLKfigzeIlCKf Unsafe Shared Key
+
+growpart:
+  mode: auto
+  devices: ["/"]
+
+runcmd:
+  - mkdir -p /var/log/audit
+
+disk_setup:
+  /dev/sdb:
+    table_type: mbr
+    layout:
+      - [25, 83]
+      - [25, 83]
+      - [25, 83]
+      - [24, 83]
+    overwrite: false
+
+fs_setup:
+  - label: var
+    device: /dev/sdb1
+    filesystem: xfs
+    overwrite: false
+  - label: varlog
+    device: /dev/sdb2
+    filesystem: xfs
+    overwrite: false
+  - label: varlogaudit
+    device: /dev/sdb3
+    filesystem: xfs
+    overwrite: false
+  - label: home
+    device: /dev/sdb4
+    filesystem: xfs
+    overwrite: false
+
+mounts:
+  - [/dev/sdb1, /var]
+  - [/dev/sdb2, /log]
+  - [/dev/sdb3, /audit-log]
+  - [/dev/sdb4, /home]
+mount_default_fields: [None, None, "xfs", "defaults,discard,nofail", "0", "2"]
+
+swap:
+  filename: /swap.img
+  size: "auto" # or size in bytes
+  maxsize: size in bytes
+
+power_state:
+  mode: reboot
+  delay: now
+  message: Installation completed
+
+final_message: "The system is finally up, after $UPTIME seconds"

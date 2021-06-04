@@ -1,9 +1,0 @@
----
-# role: rbac
-# file: defaults/main.yml
-
-# The role is disabled by default, so you do not get in trouble.
-# Checked in tasks/main.yml which includes tasks.yml if enabled.
-rbac_enabled: true
-rbac_cache_seconds: 3600
-rbac_packages: []

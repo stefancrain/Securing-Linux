@@ -1,0 +1,22 @@
+---
+name: ci
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 1
+
+      - name: yaml-lint
+        uses: karancode/yamllint-github-action@master
+        with:
+          yamllint_config_filepath: .github/lint/.yamllint.yml

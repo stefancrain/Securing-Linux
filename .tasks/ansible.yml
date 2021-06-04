@@ -1,0 +1,37 @@
+---
+version: "3"
+vars:
+  ANSIBLE_DIR: .
+  ANSIBLE_PLAYBOOK_DIR: "{{.ANSIBLE_DIR}}/playbooks"
+  ANSIBLE_INVENTORY_DIR: "{{.ANSIBLE_DIR}}/inventory"
+  ANSIBLE_GROUPS: all
+
+tasks:
+  ping:
+    desc: Test connectivity
+    cmds:
+      - ansible {{.ANSIBLE_GROUPS}} --one-line -m ping -e @{{.ANSIBLE_INVENTORY_DIR}}/group_vars/vault.yml -i {{.ANSIBLE_INVENTORY_DIR}}/hosts.yml
+
+  list:
+    desc: List hosts
+    cmds:
+      - ansible {{.ANSIBLE_GROUPS}} -i {{.ANSIBLE_INVENTORY_DIR}}/hosts.yml --list-hosts
+
+  audit:
+    desc: Run playbook to test compliance with audit tools
+    cmds:
+      - ansible-playbook -l {{.ANSIBLE_GROUPS}} {{.ANSIBLE_PLAYBOOK_DIR}}/audit.yml
+
+  setup:
+    desc: Run playbook to setup hosts
+    cmds:
+      - ansible-playbook -l {{.ANSIBLE_GROUPS}} {{.ANSIBLE_PLAYBOOK_DIR}}/setup.yml
+    generates:
+      - boxes/assets/ab0x.go
+      - assets_box.yml
+
+  replay:
+    desc: destroy + re-run the play
+    cmds:
+      - task vagrant:restore
+      - task: setup

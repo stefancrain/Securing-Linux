@@ -1,0 +1,27 @@
+{{ ansible_managed | comment }}
+
+[Init]
+message = Hello,\n\n
+you receive this mail because you're listed as contact in RIR database for an address attacking one of our systems. For details see the attached message. Please take appropriate steps to stop these attacks.
+We have detected abuse from the IP address $IP, which according to a whois lookup is on your network$
+
+# Path to the log files which contain relevant lines for the abuser IP
+#
+logpath = /dev/null
+
+# Option:  mailcmd
+# Notes.:  Your system mail command. Is passed 2 args: subject and recipient
+# Values:  CMD  Default: mail -s
+#
+mailcmd = mail -s
+
+# Option:  mailargs
+# Notes.:  Additional arguments to mail command. e.g. for standard Unix mail:
+#          CC reports to another address:
+#              -c me@example.com
+#          Appear to come from a different address - the '--' indicates
+#          arguments to be passed to Sendmail:
+#              -- -f me@example.com
+# Values:  [ STRING ]  Default: (empty)
+#
+mailargs = jail@domain.com

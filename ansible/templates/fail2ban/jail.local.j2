@@ -1,0 +1,60 @@
+{{ ansible_managed | comment }}
+
+[DEFAULT]
+
+# ignoreip = {{ network_access_fail2ban_ignoreip + ' ' + network_access_fail2ban_ip_whitelist | default('') }}
+bantime  = {{ network_access_fail2ban_bantime }}
+maxretry = {{ network_access_fail2ban_maxretry }}
+
+backend = {{network_access_fail2ban_backend}}
+
+destemail = {{ network_access_fail2ban_destemail }}
+banaction = {{ network_access_fail2ban_banaction }}
+mta = {{ network_access_fail2ban_mta }}
+protocol = {{ network_access_fail2ban_protocol }}
+chain = {{ network_access_fail2ban_chain }}
+
+action_ = %(banaction)s[name=%(__name__)s, port="%(port)s", protocol="%(protocol)s", chain="%(chain)s"]
+
+action_mw = %(banaction)s[name=%(__name__)s, port="%(port)s", protocol="%(protocol)s", chain="%(chain)s"]
+              %(mta)s-whois[name=%(__name__)s, dest="%(destemail)s", protocol="%(protocol)s", chain="%(chain)s"]
+
+action_mwl = %(banaction)s[name=%(__name__)s, port="%(port)s", protocol="%(protocol)s", chain="%(chain)s"]
+               %(mta)s-whois-lines[name=%(__name__)s, dest="%(destemail)s", logpath=%(logpath)s, chain="%(chain)s"]
+
+action_xarf    =
+
+action = %({{ network_access_fail2ban_action }})s
+
+{% if network_access_fail2ban_services is iterable %}
+{% for service in network_access_fail2ban_services %}
+[{{ service.name }}]
+
+enabled = {{ service.enabled | default("true") }}
+port = {{ service.port }}
+filter = {{ service.filter }}
+logpath = {{ service.logpath }}
+{% if service.mode is defined %}
+mode = {{ service.mode }}
+{% endif %}
+{% if service.maxretry is defined %}
+maxretry = {{ service.maxretry }}
+{% endif %}
+{% if service.bantime is defined %}
+bantime = {{ service.bantime }}
+{% endif %}
+{% if service.findtime is defined %}
+findtime = {{ service.findtime }}
+{% endif %}
+{% if service.protocol is defined %}
+protocol = {{ service.protocol }}
+{% endif %}
+{% if service.action is defined %}
+action = %({{ service.action }})s
+{% endif %}
+{% if service.banaction is defined %}
+banaction = {{ service.banaction }}
+{% endif %}
+
+{% endfor %}
+{% endif %}

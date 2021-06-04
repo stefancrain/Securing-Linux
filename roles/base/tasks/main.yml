@@ -1,7 +1,0 @@
----
-# role: bsase
-# file: tasks/main.yml
-
-- name: Import tasks for role bsase
-  import_tasks: tasks.yml
-  when: base_enabled | bool

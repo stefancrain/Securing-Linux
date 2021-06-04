@@ -1,0 +1,40 @@
+---
+version: '3'
+
+tasks:
+  default:
+    cmds:
+      - task --list
+
+  clean:
+    desc: Cleans temp files and folders
+    cmds:
+      - rm -rf dist/
+
+  lint:
+    desc: lint files
+    cmds:
+      - yamllint -c .github/lint/.yamllint.yml . || true
+      # - mdl --config .github/lint/.mdlrc --style .github/lint/.mdl.rb . || true
+      # - ansible-lint ansible/audit.yml || true
+      # - ansible-lint ansible/setup.yml || true
+      # - pre-commit run --all-files
+
+  setup:
+    desc: tf destroy and apply
+    cmds:
+      - tf destroy -auto-approve
+      - tf apply -auto-approve
+
+  pretty:
+    desc: fix errors
+    cmds:
+      - prettier --parser=markdown --write '*.md' '**/*.md' || true
+      - prettier --parser=yaml --write '*.y*ml' '**/*.y*ml' || true
+
+# includes:
+#   deps: .tasks/OS_{{OS}}.yml
+#   update: .tasks/update.yml
+#   ansible: .tasks/ansible.yml
+#   vagrant: .tasks/vagrant.yml
+#   secrets: .tasks/secrets.yml
