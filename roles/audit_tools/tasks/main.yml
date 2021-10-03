@@ -1,7 +1,0 @@
----
-# role: audit_tools
-# file: tasks/main.yml
-
-- name: Import tasks for role audit_tools
-  import_tasks: tasks.yml
-  when: audit_tools_enabled | bool

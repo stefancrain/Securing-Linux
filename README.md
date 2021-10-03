@@ -6,16 +6,15 @@ TODO: add blurb about reasoning
 
 TODO: add blurb about workflow
 
-Make no mistake this set of playbooks are opinionated and comes **without any express or implied warranty**.
+Make no mistake this set of playbooks are opinionated and come **without any express or implied warranty**.
 
 ## Steps in security
 
-1. [Set useful base tools](./roles/base)
-2. [Restrict physical access](./roles/physical_access)
-3. [Restrict network access](./roles/network_access)
-4. [Enforce role based access controls [RBAC]](./roles/rbac)
-5. [Protect data with partitioning and encryption](./roles/data)
-6. [Track audit-worthy change events](./roles/audit_tools)
+1. [Protect data with partitioning and encryption](./terraform/libvirt/ubuntu/cloud_init.yml)
+2. [Set useful base tools](./ansible/tasks/base.yml)
+3. [Restrict physical access](./ansible/tasks/physical_access.yml)
+4. [Restrict network access](./ansible/tasks/network_access.yml)
+5. [Track audit-worthy change events](./ansible/tasks/audit_tools.yml)
 
 ## Reviewing hardening efforts
 
@@ -35,11 +34,20 @@ Make no mistake this set of playbooks are opinionated and comes **without any ex
 - [dev-sec/cis-kubernetes-benchmark](https://github.com/dev-sec/cis-kubernetes-benchmark)
 - [vibrato/inspec-meltdownspectre](https://github.com/vibrato/inspec-meltdownspectre)
 
-Security hardening guides, best practices, checklists, benchmarks, tools and other resources. Help from [decalage2/awesome-security-hardening](https://github.com/decalage2/awesome-security-hardening)
+Security hardening guides, best practices, checklists, benchmarks, tools and
+other resources. Help from :
+
+- [US DoD DISA Security Technical Implementation Guides (STIGs) and Security Requirements Guides (SRGs)](https://public.cyber.mil/stigs/)
+- [decalage2/awesome-security-hardening](https://github.com/decalage2/awesome-security-hardening)
 
 ## Setting up for development
 
-This project uses [Vagrant](https://vagrantup.com/), [VirtualBox](https://www.virtualbox.org/), and [Ansible](https://www.ansible.com/) for local development and testing. The [makefile](makefile) contains most of the magic to get this project working.
+This project uses :
+- [Terraform](https://www.terraform.io/)
+  - [dmacvicar/terraform-provider-libvirt](https://github.com/dmacvicar/terraform-provider-libvirt) for local dev
+  - [aws](https://registry.terraform.io/providers/hashicorp/aws/latest) for remote dev
+- [Ansible](https://www.ansible.com/) for development and evaluation.
+- [Taskfile](./Taskfile.yml) contains most of the magic to get this project working.
 
 ### Initializing the project
 
@@ -115,3 +123,6 @@ make audit
 | RHEL   | [8](https://app.vagrantup.com/roboxes/boxes/rhel8)                   |
 |        | [7](https://app.vagrantup.com/roboxes/boxes/rhel7)                   |
 |        | [6](https://app.vagrantup.com/roboxes/boxes/rhel6)                   |
+
+
+# https://github.com/mitogen-hq/mitogen/archive/v0.3.0-rc.0.tar.gz

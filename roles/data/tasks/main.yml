@@ -1,7 +1,0 @@
----
-# role: data
-# file: tasks/main.yml
-
-- name: Import tasks for role data
-  import_tasks: tasks.yml
-  when: data_enabled | bool

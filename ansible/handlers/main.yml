@@ -1,0 +1,45 @@
+---
+- name: update-grub
+  shell: /usr/sbin/update-grub
+
+- name: grub-v2-update-config
+  command: "{{ grub_password_mkconfig }} -o {{ grub_boot_path }}/grub.cfg"
+
+- name: rebuild locales database
+  command: "{{ item }}"
+  with_items:
+    - dpkg-reconfigure locales -f noninteractive
+    - /usr/sbin/locale-gen
+
+- name: generate auditd
+  command: augenrules
+
+- name: restart auditd
+  service:
+    name: auditd
+    state: restarted
+
+
+- name: restart ssh
+  service:
+    name: ssh
+    state: restarted
+
+- name: restart fail2ban
+  service:
+    name: fail2ban
+    state: restarted
+
+- name: reload ufw
+  ufw:
+    state: reloaded
+
+- name: stop docker
+  service:
+    name: docker
+    state: stop
+
+- name: restart docker
+  service:
+    name: docker
+    state: restarted

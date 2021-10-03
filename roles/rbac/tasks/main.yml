@@ -1,7 +1,0 @@
----
-# role: rbac
-# file: tasks/main.yml
-
-- name: Import tasks for role rbac
-  import_tasks: tasks.yml
-  when: rbac_enabled | bool

@@ -1,0 +1,19 @@
+# allow all
+allow id *:*
+
+# # Allow USB mass storage devices (USB flash disks) and block everything else
+# allow with-interface equals { 08:*:* }
+
+# # Allow a specific Yubikey device to be connected via a specific port. Reject everything else on that port
+# allow 1050:0011 name "Yubico Yubikey II" serial "0001234567" via-port "1-2" hash "044b5e168d40ee0245478416caf3d998"
+# reject via-port "1-2"
+
+# # Reject devices with suspicious combination of interfaces
+# allow with-interface equals { 08:*:* }
+# reject with-interface all-of { 08:*:* 03:00:* }
+# reject with-interface all-of { 08:*:* 03:01:* }
+# reject with-interface all-of { 08:*:* e0:*:* }
+# reject with-interface all-of { 08:*:* 02:*:* }
+
+# # Allow a keyboard-only USB device only if there isn't already a USB device with a keyboard interface allowed
+# allow with-interface one-of { 03:00:01 03:01:01 } if !allowed-matches(with-interface one-of { 03:00:01 03:01:01 })

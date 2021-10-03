@@ -1,0 +1,267 @@
+---
+- name: Audit a linux environment
+  hosts: all
+  become: true
+  vars_files:
+    - "../inventory/group_vars/vault.yml"
+
+  vars:
+    inspec_supermarket_profiles:
+      - dev-sec/linux-baseline
+      - dev-sec/linux-patch-baseline
+      - dev-sec/ssh-baseline
+      - dev-sec/cis-dil-benchmark
+      - dev-sec/cis-docker-benchmark
+      - dev-sec/cis-kubernetes-benchmark
+      - vibrato/inspec-meltdownspectre
+
+    ssh_audit_port: 22
+    # ssh_audit_port: 4312
+
+  pre_tasks:
+    - name: prerequisites
+      package:
+        name: ["which"]
+        state: present
+      ignore_errors: true #
+      when: ansible_os_family == 'Archlinux'
+
+  roles:
+    - role: rvm.ruby
+      tags: ruby
+      become: true
+      rvm1_rubies:
+        - ruby-2.7.1
+      rvm1_install_flags: "--auto-dotfiles" # Remove --user-install
+      rvm1_install_path: /usr/local/rvm # Set to system location
+      rvm1_user: root # Need root account to access system location
+
+  environment:
+    PATH: /usr/local/rvm/gems/ruby-2.7.1/bin:/usr/local/rvm/gems/ruby-2.7.1@global/bin:/usr/local/rvm/rubies/ruby-2.7.1/bin:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games:/usr/local/rvm/bin:{{ ansible_env.PATH }}
+
+  tasks:
+    # include packages required by each distro
+    - include_vars: ../vars/audit-tool-apt.yml
+      when: ansible_os_family == 'Debian'
+
+    - include_vars: ../vars/audit-tool-yum.yml
+      when: ansible_os_family == 'RedHat'
+
+    - include_vars: ../vars/audit-tool-pacman.yml
+      when: ansible_os_family == 'Archlinux'
+
+    - name: "Set Ruby Version"
+      shell: "rvm use 2.7.1"
+
+    - name: "package : ensure that apt repositories are up to date"
+      apt:
+        update_cache: true
+        cache_valid_time: 3600
+      when: ansible_os_family == 'Debian'
+
+    - name: "package : ensure that yum repositories are up to date"
+      yum:
+        update_cache: true
+      when: ansible_os_family == 'RedHat'
+
+    - name: "package : ensure that pacman repositories are up to date"
+      pacman:
+        update_cache: true
+      when: ansible_os_family == 'Archlinux'
+
+    - name: "package : add YUM repositories"
+      yum:
+        name: "https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm"
+        state: present
+      when: ansible_os_family == 'RedHat'
+
+    - name: "package : install audit tools deps"
+      package:
+        name: "{{ packages }}"
+        state: present
+
+    - name: "package : gem update system"
+      gem:
+        name: system
+        state: latest
+        user_install: false
+      become: true
+
+    - name: "package : install inspec gem"
+      gem:
+        name: inspec-bin
+        user_install: false
+
+    - name: "package : install jtesta/ssh-audit"
+      git:
+        repo: "https://github.com/jtesta/ssh-audit"
+        dest: /usr/local/bin/ssh-audit
+        version: v2.2.0
+        clone: true
+        update: true
+
+    - name: "package : install CISOfy/lynis"
+      git:
+        repo: "https://github.com/CISOfy/lynis"
+        dest: /usr/local/bin/lynis
+        version: 3.0.0
+        clone: true
+        update: true
+
+    - name: "package : install CISOfy/lynis"
+      file:
+        path: /usr/local/bin/lynis
+        state: directory
+        owner: root
+        group: root
+        recurse: true
+
+    - name: "staging : create temp directory"
+      tempfile:
+        state: directory
+        suffix: report
+      register: temp
+
+    - name: "staging : create report folder"
+      file:
+        path: "{{ temp.path }}/{{ item }}"
+        state: directory
+      with_items:
+        - lynis
+        - jtesta
+
+    - name: "audit : CISOfy/lynis"
+      shell: "./lynis audit system --no-colors > {{ temp.path }}/lynis/lynis-report.html"
+      args:
+        chdir: /usr/local/bin/lynis
+
+    - name: "audit : Inspec supermarket"
+      shell: "inspec exec \
+        https://github.com/{{ item }}/archive/master.tar.gz \
+        --chef-license=accept-silent \
+        --no-enable-telemetry \
+        --no-interactive \
+        --no-distinct-exit \
+        --no-show-progress \
+        --log-level=error \
+        --reporter json:{{ temp.path }}/{{ item }}.json"
+      ignore_errors: true # fails because of test failures
+      with_items: "{{ inspec_supermarket_profiles }}"
+      changed_when: inspec_supermarket_profiles|length > 0
+
+    - name: "audit : jtesta/ssh-audit"
+      shell: "./ssh-audit.py -p {{ ssh_audit_port }} localhost > {{ temp.path }}/jtesta/ssh-audit-{{ ssh_audit_port }}.html"
+      args:
+        chdir: /usr/local/bin/ssh-audit
+
+    - name: "report : linux-baseline"
+      shell: |
+        set -o pipefail
+        jq -r '.profiles[].controls[].results[].status' {{ temp.path }}/dev-sec/linux-baseline.json | sort | uniq -c | awk '{$1=$1;print}'
+      args:
+        executable: /bin/bash
+      register: linux_baseline
+      changed_when: false
+      ignore_errors: true
+
+    - name: "report : linux-patch-baseline"
+      shell: |
+        set -o pipefail
+        jq -r '.profiles[].controls[].results[].status' {{ temp.path }}/dev-sec/linux-patch-baseline.json | sort | uniq -c | awk '{$1=$1;print}'
+      args:
+        executable: /bin/bash
+      register: linux_patch_baseline
+      changed_when: false
+      ignore_errors: true
+
+    - name: "report : ssh-baseline"
+      shell: |
+        set -o pipefail
+        jq -r '.profiles[].controls[].results[].status' {{ temp.path }}/dev-sec/ssh-baseline.json | sort | uniq -c | awk '{$1=$1;print}'
+      args:
+        executable: /bin/bash
+      register: ssh_baseline
+      changed_when: false
+      ignore_errors: true
+
+    - name: "report : cis-dil-benchmark"
+      shell: |
+        set -o pipefail
+        jq -r '.profiles[].controls[].results[].status' {{ temp.path }}/dev-sec/cis-dil-benchmark.json | sort | uniq -c | awk '{$1=$1;print}'
+      args:
+        executable: /bin/bash
+      register: cis_dil_benchmark
+      changed_when: false
+      ignore_errors: true
+
+    - name: "report : cis-docker-benchmark"
+      shell: |
+        set -o pipefail
+        jq -r '.profiles[].controls[].results[].status' {{ temp.path }}/dev-sec/cis-docker-benchmark.json | sort | uniq -c | awk '{$1=$1;print}'
+      args:
+        executable: /bin/bash
+      register: cis_docker_benchmark
+      changed_when: false
+      ignore_errors: true
+
+    - name: "report : cis-kubernetes-benchmark"
+      shell: |
+        set -o pipefail
+        jq -r '.profiles[].controls[].results[].status' {{ temp.path }}/dev-sec/cis-kubernetes-benchmark.json | sort | uniq -c | awk '{$1=$1;print}'
+      args:
+        executable: /bin/bash
+      register: cis_kubernetes_benchmark
+      changed_when: false
+      ignore_errors: true
+
+    - name: "report : inspec-meltdownspectre"
+      shell: |
+        set -o pipefail
+        jq -r '.profiles[].controls[].results[].status' {{ temp.path }}/vibrato/inspec-meltdownspectre.json | sort | uniq -c | awk '{$1=$1;print}'
+      args:
+        executable: /bin/bash
+      register: inspec_meltdownspectre
+      changed_when: false
+      ignore_errors: true
+
+    - name: "report : lynis"
+      shell: |
+        set -o pipefail
+        echo "$(grep "Hardening index" {{ temp.path }}/lynis/lynis-report.html | grep -Eow '[0-9]+')% passed"
+      args:
+        executable: /bin/bash
+      register: lynis_report
+      changed_when: false
+      ignore_errors: true
+
+    - name: "report : ssh-audit"
+      shell: |
+        set -o pipefail
+        echo "$(grep -c -e "warn" \
+        {{ temp.path }}/jtesta/ssh-audit-{{ ssh_audit_port }}.html) warn"
+        echo "$(grep -c -e "fail" \
+        {{ temp.path }}/jtesta/ssh-audit-{{ ssh_audit_port }}.html) failed"
+      args:
+        executable: /bin/bash
+      register: ssh_audit
+      changed_when: false
+      ignore_errors: true
+
+    - name: "Target host system info"
+      debug:
+        msg:
+          - "{{ ansible_distribution }} {{ ansible_distribution_version }} {{ ansible_distribution_release }}"
+          - " linux-baseline:         {{ linux_baseline.stdout_lines }}"
+          - " linux-patch-baseline:   {{ linux_patch_baseline.stdout_lines }}"
+          - " ssh-baseline:           {{ ssh_baseline.stdout_lines }}"
+          - " cis-dil-benchmark:      {{ cis_dil_benchmark.stdout_lines }}"
+          - " cis-docker-benchmark:   {{ cis_docker_benchmark.stdout_lines }}"
+          - " inspec-meltdownspectre: {{ inspec_meltdownspectre.stdout_lines }}"
+          - " lynis:                  {{ lynis_report.stdout_lines }}"
+          - " ssh-audit:              {{ ssh_audit.stdout_lines }}"
+
+    - name: "staging : remove temp folder"
+      file:
+        path: "{{ temp.path }}"
+        state: absent
+      when: temp.path is defined
